@@ -17,11 +17,9 @@ volatile boolean up;
 bool doonce = 0;
 char screen = 0;
 boolean changestate = 0;
-long weight;
 int pump1ml = 20;
 int pump2ml = 20;
 int pump3ml = 20;
-
 
 void isr0 ()  {
   TurnDetected = true;
@@ -31,6 +29,7 @@ void isr0 ()  {
 void setup() {
   Serial.begin(9600);
   lcd.begin();
+  lcd.backlight();
   pinMode(sw, INPUT_PULLUP);
   pinMode(clk, INPUT);
   pinMode(dt, INPUT);
@@ -40,7 +39,16 @@ void setup() {
   pinMode(in4, OUTPUT);
   pinMode(in5, OUTPUT);
   pinMode(in6, OUTPUT);
-  lcd.print("Sikeres lefutás!");
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, LOW);
+  digitalWrite(in3, LOW);
+  digitalWrite(in4, LOW);
+  digitalWrite(in5, LOW);
+  digitalWrite(in6, LOW);
+  attachInterrupt (0, isr0, RISING);
+  lcd.setCursor(6, 0);
+  lcd.print("Boot");
+  
 }
 
 void loop() {
