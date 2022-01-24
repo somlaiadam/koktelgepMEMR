@@ -71,5 +71,33 @@ void loop() {
         }
       }
     }
-  else {}
+  else {
+      if (up) {
+        switch (screen) {
+          Serial.print("1");
+          case 0: pump1ml = pump1ml + 10;
+          break;
+          case 1: pump2ml = pump2ml + 10;
+          break;
+        }
+      }
+      else {
+        switch (screen) {
+          Serial.print("2");
+          case 0: pump1ml = pump1ml - 10;
+          break;
+          case 1: pump2ml = pump2ml - 10;
+          break;
+        }
+      }
+    }
+    TurnDetected = false;
+  }
+
+  if (digitalRead(sw) == LOW) {
+    delay(200);
+    Serial.print("3");
+    changestate = !changestate;
+    doonce = 0;
+  }
 }
