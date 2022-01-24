@@ -52,4 +52,24 @@ void setup() {
 }
 
 void loop() {
+
+  if (TurnDetected) {
+    delay(200);
+    Serial.print("0");
+    doonce = 0;
+    if (changestate == 0) {
+      if (up) {
+        screen++;
+        if (screen > 3) {
+          screen = 3;
+        }
+      }
+      else {
+        screen = screen - 1;
+        if (screen < 0) {
+          screen = 0;
+        }
+      }
+    }
+  else {}
 }
