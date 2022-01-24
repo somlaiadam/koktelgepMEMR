@@ -100,4 +100,72 @@ void loop() {
     changestate = !changestate;
     doonce = 0;
   }
+
+  if (screen == 0 && doonce == 0) {
+    Serial.print("4");
+    lcd.clear();
+    lcd.print("Narancsle");
+    lcd.setCursor(0, 1);
+    lcd.print(pump1ml);
+    lcd.setCursor(3, 1);
+    lcd.print("ml");
+    if (changestate == 0) {
+      lcd.setCursor(8, 1 );
+      lcd.print("<-szerk?");
+    }
+    doonce = 1;
+  }
+
+  if (screen == 1 && doonce == 0) {
+    Serial.print("5");
+    lcd.clear();
+    lcd.print("Vodka");
+    lcd.setCursor(0, 1);
+    lcd.print(pump2ml);
+    lcd.setCursor(3, 1);
+    lcd.print("ml");
+    if (changestate == 0) {
+      lcd.setCursor(8, 1 );
+      lcd.print("<-szerk?");
+    }
+    doonce = 1;
+  }
+
+  if (screen == 2 && doonce == 0) {
+    Serial.print("7");
+    lcd.clear();
+    if (changestate == 0) {
+      lcd.setCursor(5, 0);
+      lcd.print("Start?");
+      lcd.setCursor(0, 1);
+      lcd.print("Indul a keveres!");
+      doonce = 1;
+    }
+    else {
+      lcd.setCursor(3, 0);
+      lcd.print("Keszul...");
+      delay(1000);
+      lcd.clear();
+      lcd.print("Motor 1 BE");
+      digitalWrite(in1, HIGH);
+      delay(10000);
+      lcd.clear();
+      lcd.print(pump1ml);
+      lcd.print("ml");
+      digitalWrite(in1, LOW);
+      
+      lcd.clear();
+      lcd.print("Motor 2 Be");
+      digitalWrite(in3, HIGH);
+      delay(10000);
+      lcd.clear();
+      lcd.print(pump2ml);
+      lcd.print("ml ");
+      digitalWrite(in3, LOW);
+      lcd.clear();
+      lcd.print("Elkeszult!");
+      delay(2000);
+      changestate = 0;
+    }
+  }
 }
