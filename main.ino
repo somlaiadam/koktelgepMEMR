@@ -10,10 +10,10 @@ HX711 scale;
 #define sw 4
 #define in1 7
 #define in2 8
-#define in3 9
-#define in4 10
-#define in5 11
-#define in6 12
+#define IN3 9
+#define IN4 10
+#define IN5 11
+#define IN6 12
 volatile boolean TurnDetected;
 volatile boolean up;
 bool doonce = 0;
@@ -24,7 +24,7 @@ int pump1ml = 20;
 int pump2ml = 20;
 int pump3ml = 20;
 
-bool poharerzek = 0;
+bool poharerzek = 1;
 int helpcount = 5;
 
 float calibration_factor = 429;
@@ -38,7 +38,6 @@ void isr0 ()  {
 }
 
 void setup() {
-  Serial.begin(9600);
   lcd.begin();
   lcd.backlight();
   scale.begin(5, 6);
@@ -50,27 +49,26 @@ void setup() {
   pinMode(dt, INPUT);
   pinMode(in1, OUTPUT);
   pinMode(in2, OUTPUT);
-  pinMode(in3, OUTPUT);
-  pinMode(in4, OUTPUT);
-  pinMode(in5, OUTPUT);
-  pinMode(in6, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+  pinMode(IN5, OUTPUT);
+  pinMode(IN6, OUTPUT);
   digitalWrite(in1, LOW);
   digitalWrite(in2, LOW);
-  digitalWrite(in3, LOW);
-  digitalWrite(in4, LOW);
-  digitalWrite(in5, LOW);
-  digitalWrite(in6, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+  digitalWrite(IN5, LOW);
+  digitalWrite(IN6, LOW);
   attachInterrupt (0, isr0, RISING);
   lcd.setCursor(5, 0);
   lcd.print("Hello!");
-  delay(4000);
+  delay(2000);
   
 }
 
 void loop() {
   if (TurnDetected) {
     delay(200);
-    Serial.print("0");
     doonce = 0;
     if (changestate == 0) {
       if (up) {
@@ -89,7 +87,6 @@ void loop() {
     else {
       if (up) {
         switch (screen) {
-          Serial.print("1");
           case 0: pump1ml = pump1ml + 10;
           break;
           case 1: pump2ml = pump2ml + 10;
@@ -98,7 +95,6 @@ void loop() {
       }
       else {
         switch (screen) {
-          Serial.print("2");
           case 0: pump1ml = pump1ml - 10;
           break;
           case 1: pump2ml = pump2ml - 10;
@@ -112,13 +108,11 @@ void loop() {
 
   if (digitalRead(sw) == LOW) {
     delay(200);
-    Serial.print("3");
     changestate = !changestate;
     doonce = 0;
   }
 
   if (screen == 0 && doonce == 0) {
-    Serial.print("4");
     lcd.clear();
     lcd.print("Narancsle");
     lcd.setCursor(0, 1);
@@ -133,7 +127,6 @@ void loop() {
   }
 
   if (screen == 1 && doonce == 0) {
-    Serial.print("5");
     lcd.clear();
     lcd.print("Vodka");
     lcd.setCursor(0, 1);
@@ -163,31 +156,28 @@ void loop() {
         lcd.setCursor(0, 0);
         lcd.print("Tegye a poharat");
         lcd.setCursor(0, 1);
-        lcd.print("a helyére (");
+        lcd.print("a helyere (");
         lcd.setCursor(12, 1);
         lcd.print(helpcount);
         lcd.setCursor(13, 1);
         lcd.print("mp)");
         delay(1000); //1 mp
         helpcount = helpcount - 1;
+        
         if (helpcount == 0)
         {
-          poharerzek = 1;
+          poharerzek = 0;
         }
-        
       }
       lcd.setCursor(3, 0);
+      lcd.clear();
       lcd.print("Keszul...");
       delay(1000);
-      delay(100);
       lcd.clear();
-      lcd.print("Motor 1 BE");
-       scale.set_scale(calibration_factor);
+      lcd.print("Motor 1 Be");
+      scale.set_scale(calibration_factor);
       pohar = scale.get_units(), 10;
-      //  if (units < 0)
-      //  {
-      //    units = 0.00;
-      // }
+      
       digitalWrite(in1, HIGH);
       while (scale.get_units() - pohar < pump1ml) {
         delay(10);
@@ -199,19 +189,78 @@ void loop() {
       
       lcd.clear();
       lcd.print("Motor 2 Be");
-      digitalWrite(in3, HIGH);
       delay(1000);
       while (scale.get_units() - pohar - pump1ml < pump2ml) {
+
+      for (int step = 0 ; step < 9 ; step++) {
+          switch (step) {
+            case 0:
+              digitalWrite(IN3, LOW);
+              digitalWrite(IN4, LOW);
+              digitalWrite(IN5, LOW);
+              digitalWrite(IN6, HIGH);
+              break;
+            case 1:
+              digitalWrite(IN3, LOW);
+              digitalWrite(IN4, LOW);
+              digitalWrite(IN5, HIGH);
+              digitalWrite(IN6, HIGH);
+              break;
+            case 2:
+              digitalWrite(IN3, LOW);
+              digitalWrite(IN4, LOW);
+              digitalWrite(IN5, HIGH);
+              digitalWrite(IN6, LOW);
+              break;
+            case 3:
+              digitalWrite(IN3, LOW);
+              digitalWrite(IN4, HIGH);
+              digitalWrite(IN5, HIGH);
+              digitalWrite(IN6, LOW);
+              break;
+            case 4:
+              digitalWrite(IN3, LOW);
+              digitalWrite(IN4, HIGH);
+              digitalWrite(IN5, LOW);
+              digitalWrite(IN6, LOW);
+              break;
+            case 5:
+              digitalWrite(IN3, HIGH);
+              digitalWrite(IN4, HIGH);
+              digitalWrite(IN5, LOW);
+              digitalWrite(IN6, LOW);
+              break;
+            case 6:
+              digitalWrite(IN3, HIGH);
+              digitalWrite(IN4, LOW);
+              digitalWrite(IN5, LOW);
+              digitalWrite(IN6, LOW);
+              break;
+            case 7:
+              digitalWrite(IN3, HIGH);
+              digitalWrite(IN4, LOW);
+              digitalWrite(IN5, LOW);
+              digitalWrite(IN6, HIGH);
+              break;
+            default:
+              digitalWrite(IN3, LOW);
+              digitalWrite(IN4, LOW);
+              digitalWrite(IN5, LOW);
+              digitalWrite(IN6, LOW);
+              break;
+          }
+        }
+
         delay(10);
       }
       lcd.clear();
       lcd.print(pump2ml);
       lcd.print("ml ");
-      digitalWrite(in3, LOW);
+
       lcd.clear();
       lcd.print("Elkeszult!");
       delay(2000);
-      bool poharerzek = 0;
+      bool poharerzek = 1;
       int helpcount = 5;
       changestate = 0;
     }
