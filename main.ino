@@ -1,7 +1,9 @@
 #include <Wire.h>
 #include <LCD_I2C.h>
+#include "HX711.h"
 
 LCD_I2C lcd(0x27, 16, 2);
+HX711 scale;
 
 #define clk 2
 #define dt 3
@@ -17,9 +19,15 @@ volatile boolean up;
 bool doonce = 0;
 char screen = 0;
 boolean changestate = 0;
+long weight;
 int pump1ml = 20;
 int pump2ml = 20;
 int pump3ml = 20;
+
+float calibration_factor = 429;
+float units;
+float pohar;
+
 
 void isr0 ()  {
   TurnDetected = true;
@@ -30,6 +38,10 @@ void setup() {
   Serial.begin(9600);
   lcd.begin();
   lcd.backlight();
+  scale.begin(5, 6);
+  scale.set_scale();
+  scale.tare();  //Reset the scale to 0
+  long zero_factor = scale.read_average();
   pinMode(sw, INPUT_PULLUP);
   pinMode(clk, INPUT);
   pinMode(dt, INPUT);
@@ -46,13 +58,13 @@ void setup() {
   digitalWrite(in5, LOW);
   digitalWrite(in6, LOW);
   attachInterrupt (0, isr0, RISING);
-  lcd.setCursor(6, 0);
-  lcd.print("Boot");
+  lcd.setCursor(5, 0);
+  lcd.print("Hello!");
+  delay(4000);
   
 }
 
 void loop() {
-
   if (TurnDetected) {
     delay(200);
     Serial.print("0");
@@ -71,7 +83,7 @@ void loop() {
         }
       }
     }
-  else {
+    else {
       if (up) {
         switch (screen) {
           Serial.print("1");
@@ -93,6 +105,7 @@ void loop() {
     }
     TurnDetected = false;
   }
+
 
   if (digitalRead(sw) == LOW) {
     delay(200);
@@ -145,10 +158,19 @@ void loop() {
       lcd.setCursor(3, 0);
       lcd.print("Keszul...");
       delay(1000);
+      delay(100);
       lcd.clear();
       lcd.print("Motor 1 BE");
+       scale.set_scale(calibration_factor);
+      pohar = scale.get_units(), 10;
+      //  if (units < 0)
+      //  {
+      //    units = 0.00;
+      // }
       digitalWrite(in1, HIGH);
-      delay(10000);
+      while (scale.get_units() - pohar < pump1ml) {
+        delay(10);
+      }
       lcd.clear();
       lcd.print(pump1ml);
       lcd.print("ml");
@@ -157,7 +179,10 @@ void loop() {
       lcd.clear();
       lcd.print("Motor 2 Be");
       digitalWrite(in3, HIGH);
-      delay(10000);
+      delay(1000);
+      while (scale.get_units() - pohar - pump1ml < pump2ml) {
+        delay(10);
+      }
       lcd.clear();
       lcd.print(pump2ml);
       lcd.print("ml ");
