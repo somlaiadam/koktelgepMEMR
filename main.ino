@@ -24,6 +24,9 @@ int pump1ml = 20;
 int pump2ml = 20;
 int pump3ml = 20;
 
+bool poharerzek = 0;
+int helpcount = 5;
+
 float calibration_factor = 429;
 float units;
 float pohar;
@@ -155,6 +158,24 @@ void loop() {
       doonce = 1;
     }
     else {
+      while (poharerzek == 1)
+      {
+        lcd.setCursor(0, 0);
+        lcd.print("Tegye a poharat");
+        lcd.setCursor(0, 1);
+        lcd.print("a helyére (");
+        lcd.setCursor(12, 1);
+        lcd.print(helpcount);
+        lcd.setCursor(13, 1);
+        lcd.print("mp)");
+        delay(1000); //1 mp
+        helpcount = helpcount - 1;
+        if (helpcount == 0)
+        {
+          poharerzek = 1;
+        }
+        
+      }
       lcd.setCursor(3, 0);
       lcd.print("Keszul...");
       delay(1000);
@@ -190,6 +211,8 @@ void loop() {
       lcd.clear();
       lcd.print("Elkeszult!");
       delay(2000);
+      bool poharerzek = 0;
+      int helpcount = 5;
       changestate = 0;
     }
   }
